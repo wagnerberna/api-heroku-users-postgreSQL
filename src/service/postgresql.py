@@ -15,8 +15,8 @@ POSTGRESQL_HEROKU = os.getenv('POSTGRESQL_HEROKU')
 class Postgresql:
     def postgresql_connect(self):
         try:
-            # connection = psycopg2.connect(DATABASE_URL, sslmode='require')
-            connection = psycopg2.connect(POSTGRESQL_HEROKU)
+            connection = psycopg2.connect(POSTGRESQL_HEROKU, sslmode='require')
+            # connection = psycopg2.connect(POSTGRESQL_HEROKU)
 
             return connection
 
