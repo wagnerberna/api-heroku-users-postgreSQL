@@ -6,22 +6,37 @@ from src.service.mail import Mail
 from src.service.payload.user import users_ns, user_post_put_fields, token_header
 from src.service.message import *
 
+user_model = UserModel()
 
 # GetAll
 @users_ns.route('users')
 class UsersController(Resource):
     def get(self):
         try:
-            data_users = UserModel().get_all()
+            # recebe uma lista com tuplas
+            data_users = user_model.get_all()
+            # print(data_users)
 
             if data_users == None:
                 return USER_NOT_FOUND, 404
             
-            # converte todos ids da lista em string
+            users = []
+            print(users)
             for user in data_users:
-                user['_id'] = str(user['_id'])
-                # del user['password']
-            return data_users, 200
+                user_add = {
+                    "user_id": user[0],
+                    "name": user[1],
+                    "email": user[2],
+                    "login": user[3],
+                    "password": "******",
+                    "status": user[5],
+                }
+                # print(user_add)
+                users.append(user_add)
+            
+            print(users)
+
+            return users, 200
 
         except:
             return INTERNAL_ERROR, 500
@@ -36,17 +51,17 @@ class UserAddController(Resource):
             new_user = request.get_json()
             # print(new_user)
             activated = False
-            user_add = UserModel().add(activated, **new_user)
-            # id do ítem adicionado
-            id = user_add.inserted_id
-            print(id)
-            
+            user_add = user_model.add(activated, **new_user)
+
+            if user_add == 0:
+                return USER_NOT_CREATED, 409
+
             # envio do email:
-            template_path_confirm = 'src/templates/mail_confirm.html'
-            email_to = 'wag.backend@gmail.com'
-            Mail().send_mail(new_user['login'], new_user['name'], email_to, template_path_confirm)
-            
-            return {'message': 'user created', 'id': f'{id}'}, 201
+            # template_path_confirm = 'src/templates/mail_confirm.html'
+            # email_to = 'wag.backend@gmail.com'
+            # Mail().send_mail(new_user['login'], new_user['name'], email_to, template_path_confirm)
+
+            return USER_CREATED, 201
 
         except:
             return INTERNAL_ERROR, 500
@@ -57,50 +72,54 @@ class UserAddController(Resource):
 class UserController(Resource):
     def get(self, id):
         try:
-            data_user = UserModel().get_by_id(id)
-            print(data_user)
+            # retorna uma tupla
+            data_user = user_model.get_by_id(id)
+            # print(data_user)
 
             if data_user == None:
                 return USER_NOT_FOUND, 404
             
-            id_db = str(data_user.get('_id'))
-            name = data_user.get('name')
-            login = data_user.get('login')
-            email = data_user.get('email')
-            activated = data_user.get('activated')
+            result = {
+                "user_id": data_user[0],
+                "name": data_user[1],
+                "email": data_user[2],
+                "login": data_user[3],
+                "password": "******",
+                "status": data_user[5],
+            }
 
-            if data_user:
-                return {'id': id_db, 'name': name, 'login':login, 'email': email, 'activated': activated}, 200
+            # print(result)
+
+            return result, 200
 
         except:
             return INTERNAL_ERROR, 500
 
+    # @jwt_required()
     @users_ns.expect(token_header, user_post_put_fields)
-    @jwt_required()
     def put(self, id):
         try:
+            # print("token:::", request.headers)
+
             data = request.get_json()
-            data_update = UserModel().update(id, **data)
+            user_update = user_model.update(id, **data)
+            print("user_update:::", user_update)
 
-            print(request.headers)
-
-            # verificar se foi feito o update pelo atributo de count
-            print(data_update.modified_count)
-            if data_update.modified_count == 1:
-                return UPDATE_SUCCESS, 200
-            return NOTHING_UPDATE, 409
+            if user_update == 0:
+                return NOTHING_UPDATE, 409
+            return UPDATE_SUCCESS, 200
 
         except:
             return INTERNAL_ERROR, 500
 
-    @jwt_required()
+    # @jwt_required()
     def delete(self, id):
         try:
-            data_delete = UserModel().delete(id)
+            data_delete = user_model.delete(id)
 
-            if data_delete.deleted_count == 1:
-                return {'message': 'user delete', 'id': f'{id}'}, 200
-            return USER_NOT_FOUND, 404
+            if data_delete == 0:
+                return USER_NOT_FOUND, 404
+            return USER_DELETED, 200
 
         except:
             return INTERNAL_ERROR, 500

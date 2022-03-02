@@ -21,21 +21,25 @@ class LoginController(Resource):
             login = data.get('login')
             password = data.get('password')
 
+            # retorna uma tupla
             login = auth_model.find_login(login)
-            print(login)
+            print("login tupla::", login)
+            # print("login tupla::", login[1])
 
-            if login['activated'] == False:
+            # safe método seguro de comparar string de password retorna boolean
+            # print(safe_str_cmp(login[4], password))
+            if login == None or safe_str_cmp(login[4], password) == False:
+                return AUTH_FAILED, 409
+
+            if login[5] == False:
                 return LOGIN_INACTIVE
 
-            # se existir um user e a senha for igual
-            # safe método seguro de comparar string de password
             # token gerado baseado no login
-            if login != None and safe_str_cmp(login['password'], password):
-                id = str(login.get('_id'))
-                token = create_access_token(identity=id)
-                return {'token': token}, 200
+            id = login[0]
+            token = create_access_token(identity=id)
+            return {'token': token}, 200
 
-            return AUTH_FAILED, 409
+            
         except:
             return INTERNAL_ERROR, 500
 
@@ -67,20 +71,21 @@ class LoginConfirm(Resource):
                 return LOGIN_NOT_FOUND, 404
 
             status_update = auth_model.update_status(login, True)
-            if status_update.modified_count == 1:
+            if status_update == 0:
+                return NOTHING_UPDATE, 409
 
-                # retorno JSON:
-                # return LOGIN_CONFIRMED, 200
+            # retorno JSON:
+            # return LOGIN_CONFIRMED, 200
 
-                # retorno HTML: (Passa um sheaders p/ não interpretar como json):
-                # make / render (flask busca por padrão na pasta templates setar no app)
-                headers = {'Content-Type': 'text/html'}
-                template_response = make_response(
-                    render_template('login_confirm.html', login_user=login), 200, headers
-                )
-                return template_response
+            # retorno HTML: (Passa um headers p/ não interpretar como json):
+            # make / render (flask busca por padrão na pasta templates setar no app)
+            headers = {'Content-Type': 'text/html'}
+            template_response = make_response(
+                render_template('login_confirm.html', login_user=login), 200, headers
+            )
+            return template_response
 
-            return NOTHING_UPDATE, 409
+            
 
         except:
             return INTERNAL_ERROR, 500

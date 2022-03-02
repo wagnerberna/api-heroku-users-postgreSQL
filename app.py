@@ -11,13 +11,14 @@ load_dotenv()
 
 APP_PORT = os.getenv("APP_PORT")
 APP_DEV_CONFIG = os.getenv("APP_DEV")
+APP_PROD_CONFIG = os.getenv("APP_PROD")
 # APP_PROD sem usar o .env
-APP_PROD_CONFIG = 'config.ProdConfig'
+# APP_PROD_CONFIG = 'config.ProdConfig'
 
 app = Flask(__name__, template_folder='src/templates')
 
 # env:
-app.config.from_object(APP_PROD_CONFIG)
+app.config.from_object(APP_DEV_CONFIG)
 
 
 api = Api(app)
