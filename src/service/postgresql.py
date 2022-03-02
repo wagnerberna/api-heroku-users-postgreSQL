@@ -9,7 +9,7 @@ POSTGRESSQL_HEROKU = os.getenv('POSTGRESSQL_HEROKU')
 
 # POSTGRESQL_LOCALHOST = "postgresql://postgres:123@localhost:5432/wb_db"
 # POSTGRESSQL_HEROKU = "postgres://ndxyrolnkefpxf:cc9f341cfcf4f8b076ee282ecb88872fe9578fa8c53ed495ff15ea6663178a8d@ec2-52-45-83-163.compute-1.amazonaws.com:5432/dbvld7vgp4pomg"
-POSTGRESSQL_HEROKU = os.environ['DATABASE_URL']
+# DATABASE_URL = os.environ['DATABASE_URL']
 
 
 class Postgresql:
