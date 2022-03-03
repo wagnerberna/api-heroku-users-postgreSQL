@@ -4,25 +4,22 @@ from dotenv import load_dotenv
 
 load_dotenv()
 POSTGRESQL_LOCALHOST = os.getenv('POSTGRESQL_LOCALHOST')
-POSTGRESQL_HEROKU = os.getenv('POSTGRESQL_HEROKU')
 DATABASE_URL = os.getenv('DATABASE_URL')
-# print(POSTGRESQL_HEROKU)
-# DATABASE_URL = os.getenv('DATABASE_URL')
+
 
 # POSTGRESQL_LOCALHOST = 'postgresql://postgres:123@localhost:5432/wb_db'
-# POSTGRESQL_HEROKU = 'postgres://ndxyrolnkefpxf:cc9f341cfcf4f8b076ee282ecb88872fe9578fa8c53ed495ff15ea6663178a8d@ec2-52-45-83-163.compute-1.amazonaws.com:5432/dbvld7vgp4pomg'
-# DATABASE_URL = os.environ['DATABASE_URL']
+# DATABASE_URL = 'postgres://ndxyrolnkefpxf:cc9f341cfcf4f8b076ee282ecb88872fe9578fa8c53ed495ff15ea6663178a8d@ec2-52-45-83-163.compute-1.amazonaws.com:5432/dbvld7vgp4pomg'
 
 
 class Postgresql:
     def postgresql_connect(self):
-        # try:
-        connection = psycopg2.connect(DATABASE_URL, sslmode='require')
+        try:
+            connection = psycopg2.connect(POSTGRESQL_LOCALHOST, sslmode='require')
 
-        return connection
+            return connection
 
-        # except:
-        #     print('ERROR - Cannot connect to db')
+        except:
+            print('ERROR - Cannot connect to db')
 
     # add /update / delete
     def execute_modify(self, sql_query, data):
