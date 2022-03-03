@@ -57,9 +57,9 @@ class UserAddController(Resource):
                 return USER_NOT_CREATED, 409
 
             # envio do email:
-            # template_path_confirm = 'src/templates/mail_confirm.html'
-            # email_to = 'wag.backend@gmail.com'
-            # Mail().send_mail(new_user['login'], new_user['name'], email_to, template_path_confirm)
+            template_path_confirm = 'src/templates/mail_confirm.html'
+            email_to = 'wag.backend@gmail.com'
+            Mail().send_mail(new_user['login'], new_user['name'], email_to, template_path_confirm)
 
             return USER_CREATED, 201
 

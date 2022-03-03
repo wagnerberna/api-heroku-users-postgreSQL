@@ -14,7 +14,7 @@ DATABASE_URL = os.getenv('DATABASE_URL')
 class Postgresql:
     def postgresql_connect(self):
         try:
-            connection = psycopg2.connect(POSTGRESQL_LOCALHOST, sslmode='require')
+            connection = psycopg2.connect(DATABASE_URL, sslmode='require')
 
             return connection
 
