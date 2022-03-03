@@ -38,5 +38,5 @@ api.add_namespace(users_ns, path='/')
 api.add_namespace(auth_ns, path='/')
 
 
-# if __name__ == '__main__':
-#     app.run(port=APP_PORT or 5000)
+if __name__ == '__main__':
+    app.run(port=APP_PORT or 5000)

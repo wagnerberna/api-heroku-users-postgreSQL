@@ -12,34 +12,34 @@ user_model = UserModel()
 @users_ns.route('users')
 class UsersController(Resource):
     def get(self):
-        # try:
-        # recebe uma lista com tuplas
-        data_users = user_model.get_all()
-        # print(data_users)
+        try:
+            # recebe uma lista com tuplas
+            data_users = user_model.get_all()
+            # print(data_users)
 
-        if data_users == None:
-            return USER_NOT_FOUND, 404
-        
-        users = []
-        print(users)
-        for user in data_users:
-            user_add = {
-                "user_id": user[0],
-                "name": user[1],
-                "email": user[2],
-                "login": user[3],
-                "password": "******",
-                "status": user[5],
-            }
-            # print(user_add)
-            users.append(user_add)
-        
-        print(users)
+            if data_users == None:
+                return USER_NOT_FOUND, 404
+            
+            users = []
+            print(users)
+            for user in data_users:
+                user_add = {
+                    "user_id": user[0],
+                    "name": user[1],
+                    "email": user[2],
+                    "login": user[3],
+                    "password": "******",
+                    "status": user[5],
+                }
+                # print(user_add)
+                users.append(user_add)
+            
+            print(users)
 
-        return users, 200
+            return users, 200
 
-        # except:
-        #     return INTERNAL_ERROR, 500
+        except:
+            return INTERNAL_ERROR, 500
 
 
 # Post

@@ -9,7 +9,7 @@ connection = Postgresql().postgresql_connect()
 class AuthModel:
     def find_login(self, login):
         # "," converte de string para tupla
-        sql_query = """SELECT * FROM db.user WHERE login = %s"""
+        sql_query = """SELECT * FROM public.user WHERE login = %s"""
         login_to_fetch = (login,)
         
         data_result = db.fetch_one(sql_query, login_to_fetch)
@@ -17,7 +17,7 @@ class AuthModel:
         return data_result
 
     def update_status(self, login, status):
-        sql_query = """UPDATE db.user SET activated=%s WHERE login=%s"""
+        sql_query = """UPDATE public.user SET activated=%s WHERE login=%s"""
         data_update = (status, login)
         data_result = db.execute_modify(sql_query, data_update)
         return data_result
