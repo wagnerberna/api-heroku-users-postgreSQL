@@ -2,6 +2,7 @@
 USER_NOT_FOUND = {'message': 'User not found.'}
 NOTHING_UPDATE = {'message': 'Nothing to update'}
 LOGIN_NOT_FOUND = {'message': 'Login not found.'}
+LOGIN_ALREDY_EXISTS = {'message': 'Login alredy exists.'}
 SUCCESS = {'message': 'Request made successfully.'}
 INTERNAL_ERROR = {'message': 'Internal error.'}
 PASSWORD_INCORRECT = {'message': 'Password incorrect.'}

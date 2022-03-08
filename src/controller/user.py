@@ -3,10 +3,12 @@ from flask_restx import Resource
 from flask_jwt_extended import jwt_required
 from src.model.user import UserModel
 from src.service.mail import Mail
-from src.service.payload.user import users_ns, user_post_put_fields, token_header
+from src.core.user import UserCore
+from src.core.payload.user import users_ns, user_post_put_fields, token_header
 from src.service.message import *
 
 user_model = UserModel()
+user_core = UserCore()
 
 # GetAll
 @users_ns.route('users')
@@ -19,24 +21,15 @@ class UsersController(Resource):
 
             if data_users == None:
                 return USER_NOT_FOUND, 404
-            
-            users = []
-            print(users)
-            for user in data_users:
-                user_add = {
-                    "user_id": user[0],
-                    "name": user[1],
-                    "email": user[2],
-                    "login": user[3],
-                    "password": "******",
-                    "status": user[5],
-                }
-                # print(user_add)
-                users.append(user_add)
-            
-            print(users)
 
-            return users, 200
+            payload_users = []
+
+            for user in data_users:
+                payload_user = user_core.payload_get_user(*user)
+                payload_users.append(payload_user)
+
+            # print(payload_users)
+            return payload_users, 200
 
         except:
             return INTERNAL_ERROR, 500
@@ -50,16 +43,19 @@ class UserAddController(Resource):
         try:
             new_user = request.get_json()
             # print(new_user)
-            activated = False
-            user_add = user_model.add(activated, **new_user)
+            payload = user_core.payload_new_and_update_user(**new_user)
+            print('---payload:::', payload)
 
+            if user_core.check_login(payload['login']):
+                return LOGIN_ALREDY_EXISTS, 409
+
+            user_add = user_model.add(**payload)
             if user_add == 0:
                 return USER_NOT_CREATED, 409
 
             # envio do email:
             template_path_confirm = 'src/templates/mail_confirm.html'
-            email_to = 'wag.backend@gmail.com'
-            Mail().send_mail(new_user['login'], new_user['name'], email_to, template_path_confirm)
+            Mail().send_mail(payload['login'], payload['name'], payload['email'], template_path_confirm)
 
             return USER_CREATED, 201
 
@@ -74,23 +70,14 @@ class UserController(Resource):
         try:
             # retorna uma tupla
             data_user = user_model.get_by_id(id)
-            # print(data_user)
+            print(data_user)
 
             if data_user == None:
                 return USER_NOT_FOUND, 404
-            
-            result = {
-                "user_id": data_user[0],
-                "name": data_user[1],
-                "email": data_user[2],
-                "login": data_user[3],
-                "password": "******",
-                "status": data_user[5],
-            }
 
-            # print(result)
+            payload = user_core.payload_get_user(*data_user)
 
-            return result, 200
+            return payload, 200
 
         except:
             return INTERNAL_ERROR, 500
@@ -102,8 +89,9 @@ class UserController(Resource):
             # print("token:::", request.headers)
 
             data = request.get_json()
-            user_update = user_model.update(id, **data)
-            print("user_update:::", user_update)
+            payload = user_core.payload_new_and_update_user(**data)
+            user_update = user_model.update(id, **payload)
+            # print("user_update:::", user_update)
 
             if user_update == 0:
                 return NOTHING_UPDATE, 409
@@ -112,7 +100,7 @@ class UserController(Resource):
         except:
             return INTERNAL_ERROR, 500
 
-    # @jwt_required()
+    @jwt_required()
     def delete(self, id):
         try:
             data_delete = user_model.delete(id)

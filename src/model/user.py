@@ -20,15 +20,15 @@ class UserModel:
         data_result = db.fetch_one(sql_query, id_to_fetch)
         return data_result
 
-    def add(self, activated, name, email, login, password):
-        sql_query = """INSERT INTO public.user (name, email, login, password, activated) VALUES (%s,%s,%s,%s,%s)"""
-        data_to_insert = (name, email, login, password, activated)
+    def add(self, name, age, email, city, login, password, description, activated):
+        sql_query = """INSERT INTO public.user (name, age, email, city, login, password, description, activated) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)"""
+        data_to_insert = (name, age, email, city, login, password, description, activated)
         data_result = db.execute_modify(sql_query, data_to_insert)
         return data_result
 
-    def update(self, id, name, email, login, password, activated):
-        sql_query = """UPDATE public.user SET name=%s, email=%s, login=%s, password=%s, activated=%s WHERE user_id=%s"""
-        data_to_updade = (name, email, login, password, activated, id)
+    def update(self, id, name, age, email, city, login, password, description, activated):
+        sql_query = """UPDATE public.user SET name=%s, age=%s, email=%s, city=%s, login=%s, password=%s, description=%s, activated=%s WHERE user_id=%s"""
+        data_to_updade = (name, age, email, city, login, password, description, activated, id)
         data_result = db.execute_modify(sql_query, data_to_updade)
         return data_result
 

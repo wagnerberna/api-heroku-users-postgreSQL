@@ -11,7 +11,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-PASSWORD = os.getenv("EMAIL_PASSWORD")
+PASSWORD = os.getenv('EMAIL_PASSWORD')
+EMAIL_GMAIL = os.getenv('EMAIL')
 
 view_template = ViewTemplate()
 
@@ -29,7 +30,7 @@ class Mail:
             try:
                 smtp.ehlo()
                 smtp.starttls()
-                smtp.login('wag.backend@gmail.com', PASSWORD)
+                smtp.login(EMAIL_GMAIL, PASSWORD)
                 smtp.send_message(message)
                 print('E-mail enviado com sucesso.')
             except Exception as e:
