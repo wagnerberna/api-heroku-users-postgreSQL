@@ -20,7 +20,6 @@ app = Flask(__name__, template_folder='src/templates')
 # env:
 app.config.from_object(APP_DEV_CONFIG)
 
-
 api = Api(app)
 jwt = JWTManager(app)
 
@@ -37,6 +36,6 @@ def verifify_blacklist(self, token):
 api.add_namespace(users_ns, path='/')
 api.add_namespace(login_ns, path='/')
 
-
-# if __name__ == '__main__':
-#     app.run(port=APP_PORT or 5000)
+# Comentar para subir para o heroku
+if __name__ == '__main__':
+    app.run(port=APP_PORT or 5000)

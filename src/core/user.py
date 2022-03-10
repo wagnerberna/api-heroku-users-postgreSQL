@@ -40,6 +40,12 @@ class UserCore:
             'activated': activated,
         }
         return payload
+    def payload_get_all_users(self, data_users):
+        payload_users = []
+        for user in data_users:
+            payload_users.append(self.payload_get_user(*user))
+        
+        return payload_users
 
     def payload_get_user(self, user_id, name, email, login, password, activated, age, description, city):
 

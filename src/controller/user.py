@@ -22,13 +22,7 @@ class UsersController(Resource):
             if data_users == None:
                 return USER_NOT_FOUND, 404
 
-            payload_users = []
-
-            for user in data_users:
-                payload_user = user_core.payload_get_user(*user)
-                payload_users.append(payload_user)
-
-            # print(payload_users)
+            payload_users = user_core.payload_get_all_users(data_users)
             return payload_users, 200
 
         except:
@@ -44,7 +38,7 @@ class UserAddController(Resource):
             new_user = request.get_json()
             # print(new_user)
             payload = user_core.payload_new_and_update_user(**new_user)
-            print('---payload:::', payload)
+            # print('---payload:::', payload)
 
             if user_core.check_login(payload['login']):
                 return LOGIN_ALREDY_EXISTS, 409
@@ -54,6 +48,7 @@ class UserAddController(Resource):
                 return USER_NOT_CREATED, 409
 
             # envio do email:
+            print(payload['login'], payload['name'], payload['email'])
             template_path_confirm = 'src/templates/mail_confirm.html'
             Mail().send_mail(payload['login'], payload['name'], payload['email'], template_path_confirm)
 
@@ -70,13 +65,12 @@ class UserController(Resource):
         try:
             # retorna uma tupla
             data_user = user_model.get_by_id(id)
-            print(data_user)
+            # print(data_user)
 
             if data_user == None:
                 return USER_NOT_FOUND, 404
 
             payload = user_core.payload_get_user(*data_user)
-
             return payload, 200
 
         except:

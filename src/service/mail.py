@@ -1,6 +1,3 @@
-# import sys
-# sys.path.insert(0, '../src')
-# from src.view.view import View
 from src.service.template import ViewTemplate
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -12,13 +9,14 @@ from dotenv import load_dotenv
 load_dotenv()
 
 PASSWORD = os.getenv('EMAIL_PASSWORD')
-EMAIL_GMAIL = os.getenv('EMAIL')
+EMAIL_GMAIL = os.getenv('EMAIL_GMAIL')
 
 view_template = ViewTemplate()
 
 class Mail:
     def send_mail(self, login_user, name_user, email_to, template_path):
         body_template = view_template.message(login_user, name_user, template_path)
+        # print(body_template)
         message = MIMEMultipart()
         message['from'] = 'Admin Backend'
         message['to'] = email_to

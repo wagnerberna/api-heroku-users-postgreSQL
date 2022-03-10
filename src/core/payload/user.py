@@ -1,5 +1,5 @@
 from flask_restx import fields, Namespace
-from setuptools import Require
+
 
 # Namespaces (conjunto de rotas)
 users_ns = Namespace('users_route', description='namespace CRUD for all users')
