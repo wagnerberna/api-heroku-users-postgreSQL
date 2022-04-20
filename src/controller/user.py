@@ -2,99 +2,103 @@ from flask import Response, request
 from flask_restx import Resource
 from flask_jwt_extended import jwt_required
 from src.model.user import UserModel
+from src.model.login import LoginModel
 from src.service.mail import Mail
 from src.core.user import UserCore
-from src.core.payload.user import users_ns, user_post_put_fields, token_header
+from src.resources.user_ns_payload import (
+    user_ns,
+    user_post_fields,
+    user_put_fields,
+    token_header,
+)
 from src.service.message import *
+from src.model.dto.userDto import UserDtoAdd, UserDtoUpdate
 
 user_model = UserModel()
+login_model = LoginModel()
 user_core = UserCore()
 
 # GetAll
-@users_ns.route('users')
 class UsersController(Resource):
     def get(self):
         try:
-            # recebe uma lista com tuplas
-            data_users = user_model.get_all()
-            # print(data_users)
+            payload_users = user_model.get_all()
 
-            if data_users == None:
+            if payload_users == None:
                 return USER_NOT_FOUND, 404
-
-            payload_users = user_core.payload_get_all_users(data_users)
             return payload_users, 200
 
-        except:
+        except Exception as error:
+            print(error)
             return INTERNAL_ERROR, 500
 
 
 # Post
-@users_ns.route('useradd')
 class UserAddController(Resource):
-    @users_ns.expect(user_post_put_fields)
+    @user_ns.expect(user_post_fields)
     def post(self):
         try:
-            new_user = request.get_json()
-            # print(new_user)
-            payload = user_core.payload_new_and_update_user(**new_user)
-            # print('---payload:::', payload)
+            new_user = UserDtoAdd.parse_obj(request.get_json())
+            payload = user_core.payload_new_user(new_user)
 
-            if user_core.check_login(payload['login']):
+            if login_model.find_login(payload.login):
                 return LOGIN_ALREDY_EXISTS, 409
 
-            user_add = user_model.add(**payload)
+            user_add = user_model.add(payload)
             if user_add == 0:
                 return USER_NOT_CREATED, 409
 
-            # envio do email:
-            print(payload['login'], payload['name'], payload['email'])
-            template_path_confirm = 'src/templates/mail_confirm.html'
-            Mail().send_mail(payload['login'], payload['name'], payload['email'], template_path_confirm)
+            # send mail:
+            template_path_confirm = "src/templates/mail_confirm.html"
+            Mail().send_mail(
+                payload.login,
+                payload.name,
+                payload.email,
+                template_path_confirm,
+            )
 
             return USER_CREATED, 201
 
-        except:
+        except Exception as error:
+            print(error)
             return INTERNAL_ERROR, 500
 
 
 # GetById / Update / Delete
-@users_ns.route('user/<id>')
 class UserController(Resource):
     def get(self, id):
         try:
-            # retorna uma tupla
             data_user = user_model.get_by_id(id)
-            # print(data_user)
 
             if data_user == None:
                 return USER_NOT_FOUND, 404
 
-            payload = user_core.payload_get_user(*data_user)
-            return payload, 200
+            data_user.password = "********"
+            payload_user = data_user.dict()
+            return payload_user, 200
 
-        except:
+        except Exception as error:
+            print(error)
             return INTERNAL_ERROR, 500
 
-    # @jwt_required()
-    @users_ns.expect(token_header, user_post_put_fields)
+    @jwt_required()
+    @user_ns.expect(token_header, user_put_fields)
     def put(self, id):
         try:
-            # print("token:::", request.headers)
-
-            data = request.get_json()
-            payload = user_core.payload_new_and_update_user(**data)
-            user_update = user_model.update(id, **payload)
-            # print("user_update:::", user_update)
+            data = UserDtoUpdate.parse_obj(request.get_json())
+            payload = user_core.payload_update_user(data)
+            user_update = user_model.update(id, payload)
 
             if user_update == 0:
                 return NOTHING_UPDATE, 409
             return UPDATE_SUCCESS, 200
 
-        except:
+        except Exception as error:
+            print(error)
             return INTERNAL_ERROR, 500
 
     @jwt_required()
+    @user_ns.expect(token_header, user_put_fields)
     def delete(self, id):
         try:
             data_delete = user_model.delete(id)
@@ -103,5 +107,6 @@ class UserController(Resource):
                 return USER_NOT_FOUND, 404
             return USER_DELETED, 200
 
-        except:
+        except Exception as error:
+            print(error)
             return INTERNAL_ERROR, 500

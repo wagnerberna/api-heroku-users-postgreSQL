@@ -1,73 +1,47 @@
+from crypt import crypt
 from unicodedata import normalize
 from src.model.login import LoginModel
+from src.service.passwords import crypt_password
 import re
+from src.model.dto.userDto import UserDtoAdd, UserDtoUpdate
 
 login_model = LoginModel()
 
 
 class UserCore:
-    def check_login(self, login):
-        if login_model.find_login(login):
-            return True
-        return False
-
-    def check_mail(self, email):
-        regex = '^[a-z0-9.]+@[a-z0-9]+\.[a-z]+(\.[a-z]+)?$'
-        if re.search(regex, email):
-            return True
-        return False
-
     def payload_clean_field(self, field):
         clean_field = field.lower().strip()
-        clean_field = normalize('NFKD', clean_field).encode('ASCII', 'ignore').decode('utf-8')
+        clean_field = (
+            normalize("NFKD", clean_field).encode("ASCII", "ignore").decode("utf-8")
+        )
         return clean_field
 
-    def payload_new_and_update_user(self, name, age, email, city, login, password, description, activated=False):
-        clean_name = self.payload_clean_field(name)
-        clean_email = self.payload_clean_field(email)
-        clean_city = self.payload_clean_field(city)
-        clean_login = self.payload_clean_field(login)
-        clean_description = self.payload_clean_field(description)
+    def payload_new_user(self, new_user):
 
-        payload = {
-            'name': clean_name,
-            'age': age,
-            'email': clean_email,
-            'city': clean_city,
-            'login': clean_login,
-            'password': password,
-            'description': clean_description,
-            'activated': activated,
-        }
+        payload = UserDtoAdd(
+            name=self.payload_clean_field(new_user.name),
+            age=new_user.age,
+            email=self.payload_clean_field(new_user.email),
+            city=self.payload_clean_field(new_user.city),
+            login=self.payload_clean_field(new_user.login),
+            password=crypt_password(new_user.password),
+            description=self.payload_clean_field(new_user.description),
+            activated=new_user.activated,
+        )
         return payload
-    def payload_get_all_users(self, data_users):
-        payload_users = []
-        for user in data_users:
-            payload_users.append(self.payload_get_user(*user))
-        
-        return payload_users
 
-    def payload_get_user(self, user_id, name, email, login, password, activated, age, description, city):
+    def payload_update_user(self, update_user):
 
-        payload = {
-            'user_id': user_id,
-            'name': name,
-            'age': age,
-            'email': email,
-            'city': city,
-            'login': login,
-            'password': '******',
-            'description': description,
-            'activated': activated,
-        }
-        print('---core payload:::', payload)
+        payload = UserDtoUpdate(
+            name=self.payload_clean_field(update_user.name),
+            age=update_user.age,
+            email=self.payload_clean_field(update_user.email),
+            city=self.payload_clean_field(update_user.city),
+            description=self.payload_clean_field(update_user.description),
+            activated=update_user.activated,
+        )
         return payload
 
 
-if __name__ == '__main__':
-    user_core = UserCore()
-    print(user_core.check_mail('teste@gmail.com'))
-    print(user_core.check_mail('teste@gmail.com.br'))
-    print(user_core.check_mail('testegmail.com'))
-    print(user_core.check_mail('teste@gmail'))
-    print(user_core.check_mail('tes$?@gmail.com'))
+# if __name__ == "__main__":
+#     user_core = UserCore()
